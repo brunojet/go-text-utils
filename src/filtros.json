@@ -1,0 +1,626 @@
+{
+    "tipos-filtros": {
+        "Região": {
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Ramo": {
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Sub-ramos": {
+            "nomeCurto": null,
+            "pai": "Ramo"
+        },
+        "Funcionalidade": {
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Estado" : {
+            "nomeCurto": null,
+            "pai": "Região"
+        }  
+    },
+    "filtros": {
+        "Alimentação": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Varejo": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Serviços": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Beleza": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Saúde": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Turismo": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Educação": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Construção": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Tecnologia": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Entretenimento": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Agronegócio": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Logística": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Eventos": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Consultoria": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Automotivo": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Pet Shop": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Imobiliário": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Transporte": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Eletrodomésticos": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Eletrônicos": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Lanchonete": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Alimentação"
+        },
+        "Restaurante": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Alimentação"
+        },
+        "Bar": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Alimentação"
+        },
+        "Padaria": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Alimentação"
+        },
+        "Supermercado": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Varejo"
+        },
+        "Loja de Roupas": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Varejo"
+        },
+        "Farmácia": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Varejo"
+        },
+        "Salão de Beleza": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Serviços"
+        },
+        "Oficina": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Serviços"
+        },
+        "Lavanderia": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Serviços"
+        },
+        "Clínica Médica": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Saúde"
+        },
+        "Odontologia": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Saúde"
+        },
+        "Laboratório": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Saúde"
+        },
+        "Agência de Viagens": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Turismo"
+        },
+        "Hotelaria": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Turismo"
+        },
+        "Guias Turísticos": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Turismo"
+        },
+        "Passeios": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Turismo"
+        },
+        "Cursos Livres": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Educação"
+        },
+        "EAD": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Educação"
+        },
+        "Idiomas": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Educação"
+        },
+        "Pré-vestibular": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Educação"
+        },
+        "Materiais de Construção": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Construção"
+        },
+        "Serviços de Obras": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Construção"
+        },
+        "Arquitetura": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Construção"
+        },
+        "Reformas": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Construção"
+        },
+        "Desenvolvimento de Software": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Tecnologia"
+        },
+        "TI Corporativo": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Tecnologia"
+        },
+        "Hardware": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Tecnologia"
+        },
+        "Suporte Técnico": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Tecnologia"
+        },
+        "Cinema": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Entretenimento"
+        },
+        "Teatro": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Entretenimento"
+        },
+        "Shows": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Entretenimento"
+        },
+        "Jogos": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Entretenimento"
+        },
+        "Fazendas": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Agronegócio"
+        },
+        "Cooperativas": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Agronegócio"
+        },
+        "Máquinas Agrícolas": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Agronegócio"
+        },
+        "Comercialização": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Agronegócio"
+        },
+        "Cosméticos": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Beleza"
+        },
+        "Estética": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Beleza"
+        },
+        "Cabeleireiro": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Beleza"
+        },
+        "Transporte de Cargas": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Logística"
+        },
+        "Armazenagem": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Logística"
+        },
+        "Frete": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Logística"
+        },
+        "Organização de Eventos": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Eventos"
+        },
+        "Buffet": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Eventos"
+        },
+        "Cerimonial": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Eventos"
+        },
+        "Consultoria Financeira": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Consultoria"
+        },
+        "Consultoria RH": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Consultoria"
+        },
+        "Consultoria Jurídica": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Consultoria"
+        },
+        "Peças e Acessórios": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Automotivo"
+        },
+        "Revendas": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Automotivo"
+        },
+        "Produtos para Animais": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Pet Shop"
+        },
+        "Clínica Veterinária": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Pet Shop"
+        },
+        "Imobiliárias": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Imobiliário"
+        },
+        "Corretagem": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Imobiliário"
+        },
+        "Administração de Condomínios": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Imobiliário"
+        },
+        "Táxi": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Transporte"
+        },
+        "Aplicativo de Mobilidade": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Transporte"
+        },
+        "Ônibus": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Transporte"
+        },
+        "Assistência Técnica": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Eletrodomésticos"
+        },
+        "Loja de Eletrodomésticos": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Eletrodomésticos"
+        },
+        "Loja de Eletrônicos": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Eletrônicos"
+        },
+        "Componentes": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Eletrônicos"
+        },
+        "Sul": {
+            "tipo": "Região",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Sudeste": {
+            "tipo": "Região",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Centro-Oeste": {
+            "tipo": "Região",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Norte": {
+            "tipo": "Região",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Nordeste": {
+            "tipo": "Região",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Pagamento por NFC": {
+            "tipo": "Funcionalidade",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Gestão de Estoque": {
+            "tipo": "Funcionalidade",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Relatórios de Vendas": {
+            "tipo": "Funcionalidade",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Programa de Fidelidade": {
+            "tipo": "Funcionalidade",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Integração com ERP": {
+            "tipo": "Funcionalidade",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Rio de Janeiro": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Sudeste"
+        },
+        "São Paulo": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Sudeste"
+        },
+        "Minas Gerais": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Sudeste"
+        },
+        "Espírito Santo": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Sudeste"
+        },
+        "Paraná": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Sul"
+        },
+        "Santa Catarina": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Sul"
+        },
+        "Rio Grande do Sul": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Sul"
+        },
+        "Distrito Federal": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Centro-Oeste"
+        },
+        "Goiás": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Centro-Oeste"
+        },
+        "Mato Grosso": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Centro-Oeste"
+        },
+        "Mato Grosso do Sul": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Centro-Oeste"
+        },
+        "Acre": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Norte"
+        },
+        "Amapá": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Norte"
+        },
+        "Amazonas": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Norte"
+        },
+        "Pará": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Norte"
+        },
+        "Rondônia": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Norte"
+        },
+        "Roraima": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Norte"
+        },
+        "Tocantins": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Norte"
+        },
+        "Alagoas": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Nordeste"
+        },
+        "Bahia": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Nordeste"
+        },
+        "Ceará": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Nordeste"
+        },
+        "Maranhão": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Nordeste"
+        },
+        "Paraíba": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Nordeste"
+        },
+        "Pernambuco": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Nordeste"
+        },
+        "Piauí": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Nordeste"
+        },
+        "Rio Grande do Norte": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Nordeste"
+        },
+        "Sergipe": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Nordeste"
+        }
+    }
+}
