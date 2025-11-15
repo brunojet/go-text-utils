@@ -149,8 +149,8 @@ func main() {
 		fmt.Println(content)
 	}
 
-	// Lê filtros.json
-	filtrosData, err := os.ReadFile("filtros.json")
+	// Lê testdata/filtros.json (moved from repo root into testdata/)
+	filtrosData, err := os.ReadFile("../testdata/filtros.json")
 	if err != nil {
 		fmt.Println("Erro ao ler filtros.json:", err)
 		return

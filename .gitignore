@@ -20,3 +20,7 @@ vendor/
 # OS
 Thumbs.db
 .DS_Store
+
+# Local data and generated run outputs
+/data/
+run_output*.txt
