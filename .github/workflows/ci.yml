@@ -23,8 +23,45 @@ jobs:
     - name: Install modules
       run: go mod download
 
+    - name: Check gofmt
+      run: |
+        # list files that need formatting; fail if any
+        unformatted=$(gofmt -l .)
+        if [ -n "$unformatted" ]; then
+          echo "The following files need formatting (run 'gofmt -w .'):"
+          echo "$unformatted"
+          exit 1
+        fi
+
+    - name: Run go vet
+      run: go vet ./...
+
     - name: Run tests
       run: go test ./... -v
 
     - name: Build demo
       run: go build ./cmd/demo
+
+    - name: Generate coverage report and HTML
+      run: |
+        set -e
+        mkdir -p coverage
+        # run tests per-package and collect individual profiles
+        for pkg in $(go list ./...); do
+          echo "running tests for $pkg"
+          # write per-package profile; allow failures to surface but continue collecting
+          go test -covermode=atomic -coverprofile=coverage/$(echo $pkg | tr '/ ' '--').cov $pkg
+        done
+        # merge profiles
+        echo "mode: atomic" > coverage.out
+        tail -q -n +2 coverage/*.cov >> coverage.out || true
+        # generate HTML
+        go tool cover -html=coverage.out -o coverage.html
+
+    - name: Upload coverage artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-html
+        path: |
+          coverage.html
+          coverage.out
