@@ -2,6 +2,8 @@ package acronym
 
 import (
 	"testing"
+
+	"github.com/brunojet/go-text-utils/internal/textutil"
 )
 
 func TestTryBuildAcronym_Basic(t *testing.T) {
@@ -53,5 +55,31 @@ func TestTryExtractSignificant_Empty(t *testing.T) {
 	_, _, err := TryExtractSignificant("", make(map[string]bool))
 	if err == nil {
 		t.Fatalf("expected error for empty input")
+	}
+}
+
+func TestTryExtractSignificant_Hash36Fallback(t *testing.T) {
+	// Prepare a clear text and pre-fill usedKeys with raw and all consonant/vowel candidates
+	clear := "ALIMENTACAO"
+	used := make(map[string]bool)
+	// mark raw
+	used[textutil.RemoveAccents(textutil.RemoveConnectors(clear))] = true
+	// mark all consonant/vowel generated candidates so the function will fallthrough to hash36
+	lenRune := len([]rune(textutil.RemoveAccents(textutil.RemoveConnectors(clear))))
+	for offset := 0; offset < lenRune-1; offset++ {
+		if s, ok := tryExtractSignificantOffset(textutil.RemoveAccents(textutil.RemoveConnectors(clear)), offset, Consonant); ok {
+			used[s] = true
+		}
+		if s, ok := tryExtractSignificantOffset(textutil.RemoveAccents(textutil.RemoveConnectors(clear)), offset, Vowel); ok {
+			used[s] = true
+		}
+	}
+
+	short, mode, err := TryExtractSignificant(clear, used)
+	if err != nil {
+		t.Fatalf("unexpected error from TryExtractSignificant: %v", err)
+	}
+	if mode != string(Hash36) {
+		t.Fatalf("expected Hash36 mode when others are exhausted, got mode=%q short=%q", mode, short)
 	}
 }

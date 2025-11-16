@@ -14,7 +14,8 @@ func TestEncodeBase36Fixed(t *testing.T) {
 		{0, 3, "000"},
 		{35, 3, "00Z"},
 		{36, 3, "010"},
-		{1295, 2, "ZZ"}, // 1295 = 35 + 35*36 = "ZZ"
+		{1295, 2, "ZZ"},    // 1295 = 35 + 35*36 = "ZZ"
+		{46656, 3, "1000"}, // 46656 == 36^3, base36 -> "1000" (len >= width -> returned as-is)
 	}
 	for _, tc := range tests {
 		bi := big.NewInt(tc.val)

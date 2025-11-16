@@ -27,3 +27,12 @@ func TestRemoveAccents(t *testing.T) {
 		}
 	}
 }
+
+func TestRemoveAccents_EmptyAndSymbols(t *testing.T) {
+	if got := RemoveAccents(""); got != "" {
+		t.Fatalf("expected empty -> empty, got %q", got)
+	}
+	if got := RemoveAccents("á-ç_9"); got != "AC9" {
+		t.Fatalf("RemoveAccents(%q) = %q; want %q", "á-ç_9", got, "AC9")
+	}
+}
