@@ -1,0 +1,32 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Go: test (coverage)",
+      "type": "shell",
+      "command": "go test ./... -coverprofile=coverage.out -covermode=atomic",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Go: coverage summary",
+      "type": "shell",
+      "command": "go tool cover -func=coverage.out",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Go: coverage (run tests then summary)",
+      "dependsOn": ["Go: test (coverage)", "Go: coverage summary"],
+      "dependsOrder": "sequence",
+      "group": "test"
+    }
+  ]
+}
