@@ -1,0 +1,7 @@
+[
+  {
+    "key": "ctrl+alt+t",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Go: coverage (run tests then summary)"
+  }
+]
