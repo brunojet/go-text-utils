@@ -141,6 +141,22 @@ func getHierarchy(filters map[string]map[string]interface{}, name string) []stri
 	return []string{typ, name}
 }
 
+// determineTypeKey retorna a chave usada para agrupar chaves curtas por tipo.
+// Se o nome for um tipo (ex: "Ramo"), a própria string do tipo é retornada.
+// Se o nome for um filtro (tem campo "tipo"), retornamos esse tipo.
+// Caso contrário, retornamos um marcador global (_GLOBAL) para nomes desconhecidos.
+func determineTypeKey(filters map[string]map[string]interface{}, filterTypes map[string]map[string]interface{}, name string) string {
+	if _, ok := filterTypes[name]; ok {
+		return name
+	}
+	if f, ok := filters[name]; ok {
+		if t, ok2 := f["tipo"]; ok2 {
+			return fmt.Sprintf("%v", t)
+		}
+	}
+	return "_GLOBAL"
+}
+
 func main() {
 	// Lê e exibe conteúdo do README.md
 	content, err := readmeContent("../README.md")
@@ -216,10 +232,15 @@ func main() {
 		nameToShort = make(map[string]string)
 		nameToMode = make(map[string]string)
 	}
-	keysByName := make(map[string]bool)
-	// mark keys already used loaded from file
+	// agora usamos chaves por tipo: map[type]map[short]bool
+	keysByType := make(map[string]map[string]bool)
+	// mark keys already used loaded from file, respecting o tipo do nome
 	for name, v := range nameToShort {
-		keysByName[v] = true
+		typeKey := determineTypeKey(filters, filterTypes, name)
+		if _, ok := keysByType[typeKey]; !ok {
+			keysByType[typeKey] = make(map[string]bool)
+		}
+		keysByType[typeKey][v] = true
 		if _, ok := nameToMode[name]; ok {
 			// keep existing mode
 		} else {
@@ -243,13 +264,17 @@ func main() {
 	for _, name := range allNames {
 		// only generate a new short if there isn't one in the loaded map
 		if _, ok := nameToShort[name]; !ok {
-			short, genType, err := generateShortName(name, keysByName)
+			typeKey := determineTypeKey(filters, filterTypes, name)
+			if _, ok := keysByType[typeKey]; !ok {
+				keysByType[typeKey] = make(map[string]bool)
+			}
+			short, genType, err := generateShortName(name, keysByType[typeKey])
 			if err != nil {
 				panic(fmt.Errorf("failed to generate short name during precompute for '%s': %w", name, err))
 			}
 			nameToShort[name] = short
 			nameToMode[name] = genType
-			keysByName[short] = true
+			keysByType[typeKey][short] = true
 		}
 	}
 
@@ -272,7 +297,11 @@ func main() {
 			}
 		}
 		filterNames = ordenar(filterNames)
-		usedKeys := make(map[string]bool)
+		// use the per-type usedKeys map so uniqueness is enforced per tipo
+		if _, ok := keysByType[tipoNome]; !ok {
+			keysByType[tipoNome] = make(map[string]bool)
+		}
+		usedKeys := keysByType[tipoNome]
 
 		// If the 'tipo' itself has a short mapping (we precomputed types too), print it
 		if tShort, ok := nameToShort[tipoNome]; ok {
