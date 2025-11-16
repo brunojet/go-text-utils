@@ -402,5 +402,108 @@
             "nomeCurto": null,
             "pai": "Imobiliário"
         }
+        ,
+        "Norte": {
+            "tipo": "Região",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Nordeste": {
+            "tipo": "Região",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Centro-Oeste": {
+            "tipo": "Região",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Sudeste": {
+            "tipo": "Região",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Sul": {
+            "tipo": "Região",
+            "nomeCurto": null,
+            "pai": null
+        },
+
+        "SP": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Sudeste"
+        },
+        "RJ": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Sudeste"
+        },
+        "MG": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Sudeste"
+        },
+        "ES": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Sudeste"
+        },
+        "BA": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Nordeste"
+        },
+        "PE": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Nordeste"
+        },
+        "CE": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Nordeste"
+        },
+        "AM": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Norte"
+        },
+        "PR": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Sul"
+        },
+        "RS": {
+            "tipo": "Estado",
+            "nomeCurto": null,
+            "pai": "Sul"
+        },
+
+        "Pagamento": {
+            "tipo": "Funcionalidade",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Consulta": {
+            "tipo": "Funcionalidade",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Cadastro": {
+            "tipo": "Funcionalidade",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Relatórios": {
+            "tipo": "Funcionalidade",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Notificações": {
+            "tipo": "Funcionalidade",
+            "nomeCurto": null,
+            "pai": null
+        }
     }
 }
