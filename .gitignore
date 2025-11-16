@@ -26,3 +26,4 @@ Thumbs.db
 # Local data and generated run outputs
 /data/
 run_output*.txt
+coverage
