@@ -35,15 +35,42 @@ Notes
 License
 
 MIT — see `LICENSE`
+
 # Projeto go-demo-filtros-curtos
 
-O objeto desse projeto é explorarmos um código para geração de chaves para busca de filtros combinados para uma loja de aplicativos de terminais POS.
+Objetivo
+--------
 
-Hoje temos como desafio de não expormos a PK das entidades e ao mesmo tempo evitar chaves com nomes muito longos tendo risco de quebra de consultas com muitas junções de filtros.
+Este projeto explora um gerador de chaves curtas (acrónios) para filtros hierárquicos usados em buscas de aplicações para terminais POS.
 
-O aplicativo espera que tenhamos filtros configuráveis para buscas de aplicativos, como por exemplo: região, ramo, subramo, funcionalidades e etc. O filtro pode ser autorelacionado, ou seja, um filtro pode ter subfiltros. Exemplo podemos ter o ramo alimentação e dentro dele termos relacionados subramos como lanchonete, restaurante, bar e etc. Os tipos de filtros e filtros devem corresponder a essa hierarquia.
+Motivação
+----------
 
-A deia é que a chave de busca seja composta de ate 3 caracteres cada parte, onde teremos no minimo a combinacao de 2 partes: TipoFiltro + Filtro + (opcional) Subfiltro. Essa chave "curta" deve ser calculada a partir do nome original do filtro, de forma que seja unica e reproduzivel, no caso de colisao, devemos ter uma estrategia para gerar chaves diferentes. Tomar cuidado com carecteres especiais, acentos e etc. Vamos padronizar sempre em maiusculas e sem acentos no formato TTT-FFF-SSS-SSS onde TTT é o tipo do filtro, FFF o filtro e SSSS o subfiltro (opcional).
+Queremos evitar expor chaves primárias (PK) nas consultas e, ao mesmo tempo, reduzir o comprimento das chaves usadas em junções e índices — chaves longas podem degradar desempenho ou quebrar consultas complexas.
+
+Modelagem de filtros
+--------------------
+
+O sistema trabalha com tipos de filtros e filtros que podem ser auto-relacionados (ou seja, um filtro pode ter subfiltros). Exemplos: "Ramo" (ex.: Alimentação) e, dentro dele, sub-ramos como "Lanchonete", "Restaurante", "Bar". A hierarquia de tipos e filtros deve ser respeitada.
+
+Especificação da chave curta
+---------------------------
+
+A ideia é que cada parte da chave tenha até 3 caracteres, e que a chave final seja composta por pelo menos duas partes: TipoFiltro + Filtro (+ opcionalmente Subfiltro). A chave curta deve ser gerada de forma determinística a partir do nome original do filtro, garantindo unicidade sempre que possível.
+
+Em caso de colisão a estratégia do gerador é empregar heurísticas (consoantes/vogais), tentativas alternativas e um fallback determinístico (hash MD5 mapeado para base36 com sondagem linear) para produzir uma chave diferente e reproduzível.
+
+Observações de normalização
+---------------------------
+
+Tomamos cuidado com caracteres especiais e acentuação: normalizamos para letras maiúsculas sem acentos e removemos palavras de ligação (conectores) quando apropriado. O formato genérico esperado é algo como TTT-FFF-SSS, onde cada bloco tem até 3 caracteres.
+
+Se quiser que a saída persista as chaves geradas no arquivo de configuração, o gerador grava um mapeamento canônico em `data/nomeParaCurto.json` (este arquivo normalmente fica em `.gitignore`).
+
+Licença
+-------
+
+MIT — ver `LICENSE`
 
 
 
