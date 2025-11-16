@@ -20,8 +20,10 @@ jobs:
       with:
         go-version: ${{ matrix.go-version }}
 
-    - name: Install modules
-      run: go mod download
+    - name: Go version and environment
+      run: |
+        go version
+        go env GOPROXY GOSUMDB GOMOD GOFLAGS
 
     - name: Check gofmt
       run: |
