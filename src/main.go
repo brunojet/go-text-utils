@@ -4,11 +4,41 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
+	"sort"
 	"strings"
 
 	acronym "github.com/brunojet/go-text-utils/pkg/acronym"
 )
+
+const unknownMode = "(unknown)"
+
+// modeLabel returns the mode string for a given name using nameToMode map,
+// or returns the default unknownMode when not present.
+func modeLabel(nameToMode map[string]string, name string) string {
+	if m, ok := nameToMode[name]; ok && m != "" {
+		return m
+	}
+	return unknownMode
+}
+
+// recordModeCounts increments both modeCounts and canonicalCounts using a
+// human-readable modeLabel. Canonical is the first token before a space.
+func recordModeCounts(modeCounts map[string]int, canonicalCounts map[string]int, modeLabelStr string) {
+	modeCounts[modeLabelStr]++
+	canonical := modeLabelStr
+	if idx := strings.Index(modeLabelStr, " "); idx != -1 {
+		canonical = modeLabelStr[:idx]
+	}
+	canonicalCounts[canonical]++
+}
+
+// ordenar returns a sorted copy of the provided slice.
+func ordenar(lista []string) []string {
+	res := make([]string, len(lista))
+	copy(res, lista)
+	sort.Strings(res)
+	return res
+}
 
 func generateShortName(name string, usedKeys map[string]bool) (string, string, error) {
 	// delegate to the acronym package (it does normalization internally)
@@ -20,63 +50,6 @@ func generateShortName(name string, usedKeys map[string]bool) (string, string, e
 type auxEntry struct {
 	Short string `json:"curto"`
 	Mode  string `json:"modo"`
-}
-
-// loadNomeParaCurto carrega o mapa nome->(curto,modo). Suporta o formato
-// antigo (map[string]string) para compatibilidade.
-func loadNameToShort(path string) (map[string]string, map[string]string, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return make(map[string]string), make(map[string]string), nil
-		}
-		return nil, nil, err
-	}
-	// Primeiro tenta o novo formato: map[name] = {curto, modo}
-	var obj map[string]auxEntry
-	if err := json.Unmarshal(data, &obj); err == nil {
-		shortMap := make(map[string]string)
-		modeMap := make(map[string]string)
-		for k, v := range obj {
-			shortMap[k] = v.Short
-			if v.Mode != "" {
-				modeMap[k] = v.Mode
-			}
-		}
-		return shortMap, modeMap, nil
-	}
-	// Fallback: formato antigo simples map[string]string
-	var old map[string]string
-	if err := json.Unmarshal(data, &old); err == nil {
-		modeMap := make(map[string]string)
-		for k := range old {
-			modeMap[k] = ""
-		}
-		return old, modeMap, nil
-	}
-	return nil, nil, fmt.Errorf("formato desconhecido em %s", path)
-}
-
-// saveNomeParaCurto persiste o mapa em JSON (cria diretório se necessário).
-// saveNomeParaCurto salva o mapa nome->(curto,modo) em JSON.
-func saveNameToShort(path string, m map[string]string, modes map[string]string) error {
-	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return err
-	}
-	obj := make(map[string]auxEntry)
-	for k, v := range m {
-		mode := ""
-		if mm, ok := modes[k]; ok {
-			mode = mm
-		}
-		obj[k] = auxEntry{Short: v, Mode: mode}
-	}
-	data, err := json.MarshalIndent(obj, "", "  ")
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(path, data, 0644)
 }
 
 // Monta nome curto final juntando nomes curtos de cada camada
@@ -91,11 +64,16 @@ func buildShortName(hierarchy []string, usedKeys map[string]bool, nameToShort ma
 		var short string
 		if prev, ok := nameToShort[h]; ok {
 			short = prev
-			usedPerLevel[i][short] = true
+			if short != "" {
+				usedPerLevel[i][short] = true
+			}
 		} else {
 			short, genType, err := generateShortName(h, usedPerLevel[i])
 			if err != nil {
 				panic(fmt.Errorf("failed to generate short name for '%s' at level %d: %w", h, i, err))
+			}
+			if short == "" {
+				panic(fmt.Errorf("generator returned empty short for '%s' at level %d", h, i))
 			}
 			nameToShort[h] = short
 			nameToMode[h] = genType
@@ -104,7 +82,8 @@ func buildShortName(hierarchy []string, usedKeys map[string]bool, nameToShort ma
 	}
 	shortName := strings.Join(shortParts, "-")
 
-	// Resolve global collision
+	// Resolve global collision: try the canonical shortName first, otherwise
+	// probe deterministic numeric suffixes until we find a free one.
 	if !usedKeys[shortName] {
 		usedKeys[shortName] = true
 		last := hierarchy[len(hierarchy)-1]
@@ -115,7 +94,23 @@ func buildShortName(hierarchy []string, usedKeys map[string]bool, nameToShort ma
 		return shortName, lastMode
 	}
 
-	return "", ""
+	// Collision detected. Generate deterministic suffixed candidates.
+	last := hierarchy[len(hierarchy)-1]
+	lastMode := ""
+	if m, ok := nameToMode[last]; ok {
+		lastMode = m
+	}
+	// Try numeric suffixes up to a reasonable limit.
+	for i := 1; i <= 999; i++ {
+		candidate := fmt.Sprintf("%s-%03d", shortName, i)
+		if !usedKeys[candidate] {
+			usedKeys[candidate] = true
+			return candidate, lastMode
+		}
+	}
+
+	// Extremely unlikely: no free candidate found in probe range.
+	panic(fmt.Errorf("unable to resolve collision for shortName '%s' (hierarchy %v)", shortName, hierarchy))
 }
 
 // readmeContent lê o conteúdo do README.md e retorna como string
@@ -157,6 +152,229 @@ func determineTypeKey(filters map[string]map[string]interface{}, filterTypes map
 	return "_GLOBAL"
 }
 
+// readFirstExistingFile lê o primeiro caminho existente da lista e retorna o conteúdo.
+func readFirstExistingFile(candidates []string) ([]byte, error) {
+	var lastErr error
+	for _, p := range candidates {
+		b, err := os.ReadFile(p)
+		if err == nil {
+			return b, nil
+		}
+		lastErr = err
+	}
+	if lastErr == nil {
+		return nil, os.ErrNotExist
+	}
+	return nil, lastErr
+}
+
+// extractObjectMap extrai um mapa[string]map[string]interface{} do mapa genérico
+// retornado pelo json.Unmarshal quando o valor em `key` é um objeto de objetos.
+// Ex: transforma filtrosRaw["filtros"] em map[nome] = map[string]interface{}.
+func extractObjectMap(raw map[string]interface{}, key string) map[string]map[string]interface{} {
+	res := make(map[string]map[string]interface{})
+	if m, ok := raw[key].(map[string]interface{}); ok {
+		for k, v := range m {
+			if obj, ok := v.(map[string]interface{}); ok {
+				res[k] = obj
+			}
+		}
+	}
+	return res
+}
+
+// printStatistics prints mode and canonical aggregated statistics.
+func printStatistics(modeCounts map[string]int, canonicalCounts map[string]int) {
+	fmt.Println("\n--- Estatísticas de modos ---")
+	total := 0
+	for _, c := range modeCounts {
+		total += c
+	}
+	if total == 0 {
+		fmt.Println("Nenhuma entrada processada.")
+		return
+	}
+	var modosList []string
+	for m := range modeCounts {
+		modosList = append(modosList, m)
+	}
+	sort.Strings(modosList)
+	for _, m := range modosList {
+		c := modeCounts[m]
+		pct := (float64(c) / float64(total)) * 100.0
+		fmt.Printf("%s: %d (%.1f%%)\n", m, c, pct)
+	}
+	fmt.Printf("Total: %d\n", total)
+
+	fmt.Println("\n--- Estatísticas canônicas (agregado) ---")
+	var canList []string
+	for k := range canonicalCounts {
+		canList = append(canList, k)
+	}
+	sort.Strings(canList)
+	canTotal := 0
+	for _, c := range canonicalCounts {
+		canTotal += c
+	}
+	for _, k := range canList {
+		c := canonicalCounts[k]
+		pct := (float64(c) / float64(canTotal)) * 100.0
+		fmt.Printf("%s: %d (%.1f%%)\n", k, c, pct)
+	}
+
+}
+
+// generateShortNames gera os nomes curtos por tipo e popula `filters` com
+// o campo `nomeCurto`. Não faz nenhuma impressão; retorna as contagens de modos
+// e canônicos para uso posterior.
+func generateShortNames(filterTypes map[string]map[string]interface{}, filters map[string]map[string]interface{}, nameToShort map[string]string, nameToMode map[string]string, keysByType map[string]map[string]bool) (map[string]int, map[string]int) {
+	// split responsibilities: iterate tipos and delegate per-tipo processing
+	modeCounts := make(map[string]int)
+	canonicalCounts := make(map[string]int)
+	for tipoNome := range filterTypes {
+		// collect names for this tipo
+		filterNames := getFilterNamesOfType(filters, tipoNome)
+		filterNames = ordenar(filterNames)
+		generateShortNamesForType(tipoNome, filterNames, filterTypes, filters, nameToShort, nameToMode, keysByType, modeCounts, canonicalCounts)
+	}
+	return modeCounts, canonicalCounts
+}
+
+// getFilterNamesOfType returns the names of filters that belong to the given tipo.
+func getFilterNamesOfType(filters map[string]map[string]interface{}, tipo string) []string {
+	var res []string
+	for name, filter := range filters {
+		if fmt.Sprintf("%v", filter["tipo"]) == tipo {
+			res = append(res, name)
+		}
+	}
+	return res
+}
+
+// precomputeNameToShort builds initial nameToShort and nameToMode maps and
+// per-type used keys map. It returns (nameToShort, nameToMode, keysByType, error).
+func precomputeNameToShort(filters map[string]map[string]interface{}, filterTypes map[string]map[string]interface{}) (map[string]string, map[string]string, map[string]map[string]bool, error) {
+	nameToShort := make(map[string]string)
+	nameToMode := make(map[string]string)
+	keysByType := make(map[string]map[string]bool)
+
+	// include both filter names and tipo names
+	nameSet := make(map[string]bool)
+	for name := range filters {
+		nameSet[name] = true
+	}
+	for t := range filterTypes {
+		nameSet[t] = true
+	}
+	var allNames []string
+	for name := range nameSet {
+		allNames = append(allNames, name)
+	}
+	allNames = ordenar(allNames)
+
+	for _, name := range allNames {
+		if _, ok := nameToShort[name]; !ok {
+			typeKey := determineTypeKey(filters, filterTypes, name)
+			if _, ok := keysByType[typeKey]; !ok {
+				keysByType[typeKey] = make(map[string]bool)
+			}
+			short, genType, err := generateShortName(name, keysByType[typeKey])
+			if err != nil {
+				return nil, nil, nil, fmt.Errorf("failed to generate short name during precompute for '%s': %w", name, err)
+			}
+			if short == "" {
+				return nil, nil, nil, fmt.Errorf("generator returned empty short for '%s' during precompute", name)
+			}
+			nameToShort[name] = short
+			nameToMode[name] = genType
+			keysByType[typeKey][short] = true
+		}
+	}
+
+	return nameToShort, nameToMode, keysByType, nil
+}
+
+// generateShortNamesForType handles generation for a single filter type.
+func generateShortNamesForType(tipoNome string, filterNames []string, filterTypes map[string]map[string]interface{}, filters map[string]map[string]interface{}, nameToShort map[string]string, nameToMode map[string]string, keysByType map[string]map[string]bool, modeCounts map[string]int, canonicalCounts map[string]int) {
+	// ensure per-type usedKeys map exists
+	if _, ok := keysByType[tipoNome]; !ok {
+		keysByType[tipoNome] = make(map[string]bool)
+	}
+	usedKeys := keysByType[tipoNome]
+
+	// If the 'tipo' itself has a short mapping (we precomputed types too), record it
+	if tShort, ok := nameToShort[tipoNome]; ok {
+		if tf, tok := filterTypes[tipoNome]; tok {
+			tf["nomeCurto"] = tShort
+		}
+		usedKeys[tShort] = true
+		modeLabelStr := modeLabel(nameToMode, tipoNome)
+		recordModeCounts(modeCounts, canonicalCounts, modeLabelStr)
+	}
+
+	for _, name := range filterNames {
+		processFilterName(name, filters, nameToShort, nameToMode, usedKeys, modeCounts, canonicalCounts)
+	}
+}
+
+// processFilterName generates the short name for a single filter and updates
+// the provided counts and maps.
+func processFilterName(name string, filters map[string]map[string]interface{}, nameToShort map[string]string, nameToMode map[string]string, usedKeys map[string]bool, modeCounts map[string]int, canonicalCounts map[string]int) {
+	filter := filters[name]
+	hierarchy := getHierarchy(filters, name)
+	shortName, mode := buildShortName(hierarchy, usedKeys, nameToShort, nameToMode)
+	usedKeys[shortName] = true
+	filter["nomeCurto"] = shortName
+	modeLabelStr := mode
+	if modeLabelStr == "" {
+		modeLabelStr = unknownMode
+	}
+	recordModeCounts(modeCounts, canonicalCounts, modeLabelStr)
+}
+
+// logShortNames imprime o log de nomes curtos baseado nos dados já gerados
+// em `filters`, `nameToShort` e `nameToMode`.
+func logShortNames(filterTypes map[string]map[string]interface{}, filters map[string]map[string]interface{}, nameToShort map[string]string, nameToMode map[string]string, keysByType map[string]map[string]bool) {
+	fmt.Println("\n--- LOG DE nomesCurtos ---")
+	for tipoNome := range filterTypes {
+		fmt.Printf("\nTipo-filtro: %s\n", tipoNome)
+		filterNames := getFilterNamesOfType(filters, tipoNome)
+		filterNames = ordenar(filterNames)
+		if _, ok := keysByType[tipoNome]; !ok {
+			keysByType[tipoNome] = make(map[string]bool)
+		}
+		usedKeys := keysByType[tipoNome]
+
+		if tShort, ok := nameToShort[tipoNome]; ok {
+			modeLabelStr := "(unknown)"
+			if m, mok := nameToMode[tipoNome]; mok && m != "" {
+				modeLabelStr = m
+			}
+			fmt.Printf("%s --> %s (modo=%s)\n", tShort, tipoNome, modeLabelStr)
+			if tf, tok := filterTypes[tipoNome]; tok {
+				tf["nomeCurto"] = tShort
+			}
+			usedKeys[tShort] = true
+		}
+		for _, name := range filterNames {
+			filter := filters[name]
+			if v, ok := filter["nomeCurto"]; ok {
+				longHierarchy := strings.Join(getHierarchy(filters, name), "-")
+				modeLabelStr := "(unknown)"
+				// infer mode from nameToMode if available
+				if m, mok := nameToMode[name]; mok && m != "" {
+					modeLabelStr = m
+				}
+				fmt.Printf("%s --> %s (modo=%s)\n", v, longHierarchy, modeLabelStr)
+			} else {
+				// nomeCurto missing: log a warning instead of recomputing here.
+				longHierarchy := strings.Join(getHierarchy(filters, name), "-")
+				fmt.Printf("[WARN] nomeCurto ausente para %s (hierarchy=%s)\n", name, longHierarchy)
+			}
+		}
+	}
+}
+
 func main() {
 	// Lê e exibe conteúdo do README.md
 	content, err := readmeContent("../README.md")
@@ -167,15 +385,8 @@ func main() {
 
 	// Lê testdata/filtros.json (try a few likely relative paths so the program
 	// works whether executed from the repo root or from src/)
-	var filtrosData []byte
-	var readErr error
 	candidates := []string{"testdata/filtros.json", "../testdata/filtros.json", "filtros.json"}
-	for _, p := range candidates {
-		filtrosData, readErr = os.ReadFile(p)
-		if readErr == nil {
-			break
-		}
-	}
+	filtrosData, readErr := readFirstExistingFile(candidates)
 	if readErr != nil {
 		fmt.Println("Erro ao ler filtros.json:", readErr)
 		return
@@ -189,217 +400,28 @@ func main() {
 		return
 	}
 
-	filterTypes := make(map[string]map[string]interface{})
-	if tf, ok := filtrosRaw["tipos-filtros"].(map[string]interface{}); ok {
-		for k, v := range tf {
-			if obj, ok := v.(map[string]interface{}); ok {
-				filterTypes[k] = obj
-			}
-		}
-	}
+	filterTypes := extractObjectMap(filtrosRaw, "tipos-filtros")
+	filters := extractObjectMap(filtrosRaw, "filtros")
 
-	filters := make(map[string]map[string]interface{})
-	if fs, ok := filtrosRaw["filtros"].(map[string]interface{}); ok {
-		for k, v := range fs {
-			if obj, ok := v.(map[string]interface{}); ok {
-				filters[k] = obj
-			}
-		}
-	}
-
-	ordenar := func(lista []string) []string {
-		res := make([]string, len(lista))
-		copy(res, lista)
-		for i := 0; i < len(res)-1; i++ {
-			for j := 0; j < len(res)-i-1; j++ {
-				if res[j] > res[j+1] {
-					res[j], res[j+1] = res[j+1], res[j]
-				}
-			}
-		}
-		return res
-	}
+	// nota: usamos a função top-level `ordenar` definida acima
 
 	// ...existing code...
 
-	// Pré-calcula (ou carrega) um mapeamento canônico nome -> curto para todos os filtros
-	// usando um conjunto global de chaves por nome, para garantir que o mesmo
-	// filtro gere sempre o mesmo acrônimo independentemente da ordem.
-	auxPath := "../data/nomeParaCurto.json"
-	nameToShort, nameToMode, err := loadNameToShort(auxPath)
+	// Pré-calcula (sem cache em disco): inicializa mapas em memória.
+	// Removemos o uso de `data/nomeParaCurto.json` para evitar que um cache
+	// em disco influencie os resultados gerados nesta execução.
+	nameToShort, nameToMode, keysByType, err := precomputeNameToShort(filters, filterTypes)
 	if err != nil {
-		fmt.Println("Aviso: falha ao carregar mapeamento auxiliar, prosseguindo com mapa vazio:", err)
-		nameToShort = make(map[string]string)
-		nameToMode = make(map[string]string)
-	}
-	// agora usamos chaves por tipo: map[type]map[short]bool
-	keysByType := make(map[string]map[string]bool)
-	// mark keys already used loaded from file, respecting o tipo do nome
-	for name, v := range nameToShort {
-		typeKey := determineTypeKey(filters, filterTypes, name)
-		if _, ok := keysByType[typeKey]; !ok {
-			keysByType[typeKey] = make(map[string]bool)
-		}
-		keysByType[typeKey][v] = true
-		if _, ok := nameToMode[name]; ok {
-			// keep existing mode
-		} else {
-			nameToMode[name] = ""
-		}
+		panic(err)
 	}
 
-	// incluir tanto os nomes dos filtros quanto os nomes de tipo (ex: "Ramo", "Funcionalidade")
-	nameSet := make(map[string]bool)
-	for name := range filters {
-		nameSet[name] = true
-	}
-	for t := range filterTypes {
-		nameSet[t] = true
-	}
-	var allNames []string
-	for name := range nameSet {
-		allNames = append(allNames, name)
-	}
-	allNames = ordenar(allNames)
-	for _, name := range allNames {
-		// only generate a new short if there isn't one in the loaded map
-		if _, ok := nameToShort[name]; !ok {
-			typeKey := determineTypeKey(filters, filterTypes, name)
-			if _, ok := keysByType[typeKey]; !ok {
-				keysByType[typeKey] = make(map[string]bool)
-			}
-			short, genType, err := generateShortName(name, keysByType[typeKey])
-			if err != nil {
-				panic(fmt.Errorf("failed to generate short name during precompute for '%s': %w", name, err))
-			}
-			nameToShort[name] = short
-			nameToMode[name] = genType
-			keysByType[typeKey][short] = true
-		}
-	}
+	// Nota: não salvamos mapeamento auxiliar em disco (cache desabilitado).
 
-	// salvar (ou atualizar) o auxiliar no disco
-	if err := saveNameToShort(auxPath, nameToShort, nameToMode); err != nil {
-		fmt.Println("Aviso: falha ao gravar mapeamento auxiliar:", err)
-	}
+	modeCounts, canonicalCounts := generateShortNames(filterTypes, filters, nameToShort, nameToMode, keysByType)
+	logShortNames(filterTypes, filters, nameToShort, nameToMode, keysByType)
 
-	fmt.Println("\n--- LOG DE nomesCurtos ---")
-	// estatísticas de modos usadas durante a geração/impressão
-	modeCounts := make(map[string]int)
-	// agregação canônica (sem offsets), ex: "consoante", "vogal", "raw", "hash36", "(unknown)"
-	canonicalCounts := make(map[string]int)
-	for tipoNome := range filterTypes {
-		fmt.Printf("\nTipo-filtro: %s\n", tipoNome)
-		var filterNames []string
-		for name, filter := range filters {
-			if fmt.Sprintf("%v", filter["tipo"]) == tipoNome {
-				filterNames = append(filterNames, name)
-			}
-		}
-		filterNames = ordenar(filterNames)
-		// use the per-type usedKeys map so uniqueness is enforced per tipo
-		if _, ok := keysByType[tipoNome]; !ok {
-			keysByType[tipoNome] = make(map[string]bool)
-		}
-		usedKeys := keysByType[tipoNome]
-
-		// If the 'tipo' itself has a short mapping (we precomputed types too), print it
-		if tShort, ok := nameToShort[tipoNome]; ok {
-			modeLabelStr := "(unknown)"
-			if m, mok := nameToMode[tipoNome]; mok && m != "" {
-				modeLabelStr = m
-			}
-			fmt.Printf("%s --> %s (modo=%s)\n", tShort, tipoNome, modeLabelStr)
-			// also record the short-name into the tipos-filtros structure so it
-			// appears as `nomeCurto` if someone inspects the loaded JSON in-memory.
-			if tf, tok := filterTypes[tipoNome]; tok {
-				tf["nomeCurto"] = tShort
-			}
-			usedKeys[tShort] = true
-			// count mode
-			modeCounts[modeLabelStr]++
-			canonical := modeLabelStr
-			if idx := strings.Index(modeLabelStr, " "); idx != -1 {
-				canonical = modeLabelStr[:idx]
-			}
-			canonicalCounts[canonical]++
-		}
-		for _, name := range filterNames {
-			filter := filters[name]
-			hierarchy := getHierarchy(filters, name)
-			shortName, mode := buildShortName(hierarchy, usedKeys, nameToShort, nameToMode)
-			usedKeys[shortName] = true
-			filter["nomeCurto"] = shortName
-			longHierarchy := strings.Join(hierarchy, "-")
-			modeLabelStr := "(unknown)"
-			if mode != "" {
-				modeLabelStr = mode
-			}
-			fmt.Printf("%s --> %s (modo=%s)\n", shortName, longHierarchy, modeLabelStr)
-			// count mode
-			modeCounts[modeLabelStr]++
-			// update canonical aggregation (remove offset/description after space)
-			canonical := modeLabelStr
-			if idx := strings.Index(modeLabelStr, " "); idx != -1 {
-				canonical = modeLabelStr[:idx]
-			}
-			canonicalCounts[canonical]++
-		}
-	}
-
-	// imprime estatísticas resumidas por modo
-	fmt.Println("\n--- Estatísticas de modos ---")
-	total := 0
-	for _, c := range modeCounts {
-		total += c
-	}
-	if total == 0 {
-		fmt.Println("Nenhuma entrada processada.")
-		return
-	}
-	// ordenar chaves para saída estável
-	var modosList []string
-	for m := range modeCounts {
-		modosList = append(modosList, m)
-	}
-	// simples ordenação lexical
-	for i := 0; i < len(modosList)-1; i++ {
-		for j := 0; j < len(modosList)-i-1; j++ {
-			if modosList[j] > modosList[j+1] {
-				modosList[j], modosList[j+1] = modosList[j+1], modosList[j]
-			}
-		}
-	}
-	for _, m := range modosList {
-		c := modeCounts[m]
-		pct := (float64(c) / float64(total)) * 100.0
-		fmt.Printf("%s: %d (%.1f%%)\n", m, c, pct)
-	}
-	fmt.Printf("Total: %d\n", total)
-
-	// Imprime estatísticas canônicas agregadas (por tipo, sem offsets)
-	fmt.Println("\n--- Estatísticas canônicas (agregado) ---")
-	// ordenar chaves para saída estável
-	var canList []string
-	for k := range canonicalCounts {
-		canList = append(canList, k)
-	}
-	for i := 0; i < len(canList)-1; i++ {
-		for j := 0; j < len(canList)-i-1; j++ {
-			if canList[j] > canList[j+1] {
-				canList[j], canList[j+1] = canList[j+1], canList[j]
-			}
-		}
-	}
-	canTotal := 0
-	for _, c := range canonicalCounts {
-		canTotal += c
-	}
-	for _, k := range canList {
-		c := canonicalCounts[k]
-		pct := (float64(c) / float64(canTotal)) * 100.0
-		fmt.Printf("%s: %d (%.1f%%)\n", k, c, pct)
-	}
+	// imprime estatísticas resumidas por modo e canônicas (delegado)
+	printStatistics(modeCounts, canonicalCounts)
 }
 
 // modoLabel removido: agora usamos a string do modo diretamente
