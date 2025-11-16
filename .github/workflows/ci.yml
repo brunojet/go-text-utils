@@ -10,8 +10,10 @@ jobs:
 
     strategy:
       matrix:
-        # Use string forms to avoid YAML/number parsing issues in the runner
-        go-version: ['1.18.x', '1.19.x', '1.20.x']
+        # The module requires Go 1.24 (see go.mod). Use a matching toolchain
+        # here. Older Go versions do not understand the 'toolchain' directive
+        # and will fail parsing go.mod.
+        go-version: ['1.24.x']
 
     steps:
     - uses: actions/checkout@v4
