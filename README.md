@@ -15,8 +15,9 @@ Quick start
 
 2. Run the demo (inside repo)
 
-    cd src
-    go run .
+    # build and run the small demo binary (recommended)
+    go build ./cmd/demo
+    ./cmd/demo/demo.exe  # on Windows; on *nix use ./cmd/demo/demo
 
 3. Use the package
 
