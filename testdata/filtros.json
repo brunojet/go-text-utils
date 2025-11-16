@@ -16,10 +16,10 @@
             "nomeCurto": null,
             "pai": null
         },
-        "Estado" : {
+        "Estado": {
             "nomeCurto": null,
             "pai": "Região"
-        }  
+        }
     },
     "filtros": {
         "Alimentação": {
@@ -401,8 +401,7 @@
             "tipo": "Sub-ramos",
             "nomeCurto": null,
             "pai": "Imobiliário"
-        }
-        ,
+        },
         "Norte": {
             "tipo": "Região",
             "nomeCurto": null,
@@ -428,7 +427,6 @@
             "nomeCurto": null,
             "pai": null
         },
-
         "SP": {
             "tipo": "Estado",
             "nomeCurto": null,
@@ -479,7 +477,6 @@
             "nomeCurto": null,
             "pai": "Sul"
         },
-
         "Pagamento": {
             "tipo": "Funcionalidade",
             "nomeCurto": null,
@@ -501,6 +498,131 @@
             "pai": null
         },
         "Notificações": {
+            "tipo": "Funcionalidade",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Serviços Financeiros": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "E-commerce": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Assinaturas": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Bebidas": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Vinhos": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Bebidas"
+        },
+        "Cervejarias": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Bebidas"
+        },
+        "Food Truck": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Alimentação"
+        },
+        "Delivery": {
+            "tipo": "Funcionalidade",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Marketplace": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Varejo"
+        },
+        "Cloud": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Tecnologia"
+        },
+        "SaaS": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Tecnologia"
+        },
+        "DevOps": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Tecnologia"
+        },
+        "Segurança da Informação": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Tecnologia"
+        },
+        "Telemedicina": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Saúde"
+        },
+        "Bem-Estar": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Saúde Mental": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Bem-Estar"
+        },
+        "Academia": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Bem-Estar"
+        },
+        "Marketing": {
+            "tipo": "Ramo",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Publicidade": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Marketing"
+        },
+        "Design": {
+            "tipo": "Sub-ramos",
+            "nomeCurto": null,
+            "pai": "Marketing"
+        },
+        "Autenticação": {
+            "tipo": "Funcionalidade",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Autorização": {
+            "tipo": "Funcionalidade",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Dashboard": {
+            "tipo": "Funcionalidade",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Exportação": {
+            "tipo": "Funcionalidade",
+            "nomeCurto": null,
+            "pai": null
+        },
+        "Integração API": {
             "tipo": "Funcionalidade",
             "nomeCurto": null,
             "pai": null

@@ -149,10 +149,19 @@ func main() {
 		fmt.Println(content)
 	}
 
-	// Lê testdata/filtros.json (moved from repo root into testdata/)
-	filtrosData, err := os.ReadFile("../testdata/filtros.json")
-	if err != nil {
-		fmt.Println("Erro ao ler filtros.json:", err)
+	// Lê testdata/filtros.json (try a few likely relative paths so the program
+	// works whether executed from the repo root or from src/)
+	var filtrosData []byte
+	var readErr error
+	candidates := []string{"testdata/filtros.json", "../testdata/filtros.json", "filtros.json"}
+	for _, p := range candidates {
+		filtrosData, readErr = os.ReadFile(p)
+		if readErr == nil {
+			break
+		}
+	}
+	if readErr != nil {
+		fmt.Println("Erro ao ler filtros.json:", readErr)
 		return
 	}
 
@@ -264,6 +273,28 @@ func main() {
 		}
 		filterNames = ordenar(filterNames)
 		usedKeys := make(map[string]bool)
+
+		// If the 'tipo' itself has a short mapping (we precomputed types too), print it
+		if tShort, ok := nameToShort[tipoNome]; ok {
+			modeLabelStr := "(unknown)"
+			if m, mok := nameToMode[tipoNome]; mok && m != "" {
+				modeLabelStr = m
+			}
+			fmt.Printf("%s --> %s (modo=%s)\n", tShort, tipoNome, modeLabelStr)
+			// also record the short-name into the tipos-filtros structure so it
+			// appears as `nomeCurto` if someone inspects the loaded JSON in-memory.
+			if tf, tok := filterTypes[tipoNome]; tok {
+				tf["nomeCurto"] = tShort
+			}
+			usedKeys[tShort] = true
+			// count mode
+			modeCounts[modeLabelStr]++
+			canonical := modeLabelStr
+			if idx := strings.Index(modeLabelStr, " "); idx != -1 {
+				canonical = modeLabelStr[:idx]
+			}
+			canonicalCounts[canonical]++
+		}
 		for _, name := range filterNames {
 			filter := filters[name]
 			hierarchy := getHierarchy(filters, name)
